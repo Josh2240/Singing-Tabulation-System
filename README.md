@@ -47,7 +47,7 @@ You can change these by setting `ADMIN_USERNAME` and `ADMIN_PASSWORD` in `.env`
 
 ## Project layout
 
-```
+```files
 app/
   api/                # Next.js route handlers
     singers/          # CRUD for performers
@@ -78,4 +78,5 @@ middleware.ts         # Protects routes (redirects to /login)
 - The "Clear" button on each row deletes **all** scores for that performer.
 - The `voting` middleware only blocks unauthenticated users; the criteria
   editor is additionally restricted to users with `role === 'admin'`.
-# Singing-Tabulation-System
+
+## Singing-Tabulation-System
