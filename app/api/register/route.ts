@@ -1,9 +1,14 @@
 import { NextResponse } from 'next/server'
 import bcrypt from 'bcryptjs'
 import { getPool } from '../../../lib/db'
+import { getToken } from '../../../lib/auth'
 
 export async function POST(req: Request) {
   try {
+    const user = await getToken(req)
+    if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    if (user.role !== 'admin') return NextResponse.json({ error: 'Only admins can create judge accounts' }, { status: 403 })
+
     const body = await req.json()
     if (!body.username || !body.password) {
       return NextResponse.json({ error: 'Username and password required' }, { status: 400 })
@@ -18,7 +23,7 @@ export async function POST(req: Request) {
     try {
       const result = await pool.run(
         'INSERT INTO users (username, password, role) VALUES (?, ?, ?)',
-        [String(body.username), hashed, body.role === 'admin' ? 'admin' : 'judge']
+        [String(body.username), hashed, 'judge']
       )
       return NextResponse.json({ message: 'User created', id: result.insertId, username: body.username })
     } catch (insertErr) {

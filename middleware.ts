@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getTokenEdge } from './lib/auth-edge'
 
-const PUBLIC_PATHS = ['/login', '/api/login', '/api/register', '/favicon.ico']
+const PUBLIC_PATHS = ['/login', '/api/login', '/favicon.ico']
 
 export async function middleware(req: NextRequest) {
   const { pathname } = req.nextUrl

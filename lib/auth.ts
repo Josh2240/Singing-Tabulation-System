@@ -1,5 +1,4 @@
 import { cookies } from 'next/headers'
-import { NextRequest } from 'next/server'
 import jwt from 'jsonwebtoken'
 
 export interface AuthUser {
@@ -14,7 +13,7 @@ export function signToken(user: AuthUser) {
   return jwt.sign(user, SECRET, { expiresIn: '8h' })
 }
 
-export async function getToken(req?: NextRequest) {
+export async function getToken(req?: Request) {
   const store = cookies()
   const c = store.get('auth-token')?.value
   if (c) return verifyToken(c)

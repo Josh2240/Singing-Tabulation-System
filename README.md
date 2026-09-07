@@ -9,6 +9,8 @@ project but redesigned end-to-end for vocal performances.
   Song Interpretation, Overall Impact — pre-seeded, fully editable)
 - Judges submit scores per criterion and the scoreboard re-ranks in real time
 - Admin and judge accounts (JWT cookie auth, bcrypt password hashing)
+- Judges can only submit scores under their own account; admins manage performers,
+  scoring criteria, and score corrections
 - MySQL when configured, automatic SQLite fallback (`data.sqlite`)
 
 ## Tech stack
@@ -36,7 +38,8 @@ On first start, the app seeds a default admin account:
 | `admin`  | `admin123` |
 
 You can change these by setting `ADMIN_USERNAME` and `ADMIN_PASSWORD` in `.env`
-**before** the first run, or by inserting a new user through `/api/register`.
+**before** the first run. Authenticated admins can create judge accounts through
+`/api/register`.
 
 ### Database
 
@@ -76,7 +79,9 @@ middleware.ts         # Protects routes (redirects to /login)
   across all judges. This keeps every weight comparable regardless of how
   many judges have submitted.
 - The "Clear" button on each row deletes **all** scores for that performer.
-- The `voting` middleware only blocks unauthenticated users; the criteria
-  editor is additionally restricted to users with `role === 'admin'`.
+- Judges submit scores with their authenticated username; the score API ignores
+  client-supplied judge names.
+- The criteria editor and score/performer management actions are restricted to
+  users with `role === 'admin'`. Score submission is restricted to judges.
 
 ## Singing-Tabulation-System

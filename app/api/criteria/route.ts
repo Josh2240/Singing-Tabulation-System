@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server'
 import { getPool } from '../../../lib/db'
+import { getToken } from '../../../lib/auth'
 
 interface CriteriaRow {
   id: number
@@ -22,6 +23,10 @@ export async function GET() {
 
 export async function POST(req: Request) {
   try {
+    const user = await getToken(req)
+    if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    if (user.role !== 'admin') return NextResponse.json({ error: 'Only admins can manage scoring criteria' }, { status: 403 })
+
     const body = await req.json()
     if (!body.name || !String(body.name).trim()) {
       return NextResponse.json({ error: 'Criterion name is required' }, { status: 400 })
@@ -48,6 +53,10 @@ export async function POST(req: Request) {
 
 export async function PUT(req: Request) {
   try {
+    const user = await getToken(req)
+    if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    if (user.role !== 'admin') return NextResponse.json({ error: 'Only admins can manage scoring criteria' }, { status: 403 })
+
     const body = await req.json()
     if (!body.id || !body.name || !String(body.name).trim()) {
       return NextResponse.json({ error: 'Criterion id and name are required' }, { status: 400 })
@@ -74,6 +83,10 @@ export async function PUT(req: Request) {
 
 export async function DELETE(req: Request) {
   try {
+    const user = await getToken(req)
+    if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    if (user.role !== 'admin') return NextResponse.json({ error: 'Only admins can manage scoring criteria' }, { status: 403 })
+
     const body = await req.json()
     if (!body.id) {
       return NextResponse.json({ error: 'Criterion id is required' }, { status: 400 })

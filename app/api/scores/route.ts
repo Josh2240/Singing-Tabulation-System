@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server'
 import { getPool } from '../../../lib/db'
+import { getToken } from '../../../lib/auth'
 
 export async function GET() {
   try {
@@ -14,6 +15,10 @@ export async function GET() {
 
 export async function POST(req: Request) {
   try {
+    const user = await getToken(req)
+    if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    if (user.role !== 'judge') return NextResponse.json({ error: 'Only judges can submit scores' }, { status: 403 })
+
     const body = await req.json()
     if (!body.singerId || body.score === undefined || body.score === null) {
       return NextResponse.json({ error: 'singerId and score are required' }, { status: 400 })
@@ -21,7 +26,7 @@ export async function POST(req: Request) {
     const pool = await getPool()
     const res = await pool.run(
       'INSERT INTO scores (singerId, judge, score) VALUES (?, ?, ?)',
-      [Number(body.singerId), body.judge ? String(body.judge).trim() : 'Anonymous', Number(body.score)]
+      [Number(body.singerId), user.username, Number(body.score)]
     )
     const insertId = res.insertId
 
@@ -39,7 +44,7 @@ export async function POST(req: Request) {
     return NextResponse.json({
       id: insertId,
       singerId: Number(body.singerId),
-      judge: body.judge ? String(body.judge).trim() : 'Anonymous',
+      judge: user.username,
       score: Number(body.score)
     })
   } catch (err) {

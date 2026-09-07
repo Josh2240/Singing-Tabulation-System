@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server'
 import { getPool } from '../../../lib/db'
+import { getToken } from '../../../lib/auth'
 
 export async function GET() {
   try {
@@ -14,6 +15,10 @@ export async function GET() {
 
 export async function POST(req: Request) {
   try {
+    const user = await getToken(req)
+    if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    if (user.role !== 'admin') return NextResponse.json({ error: 'Only admins can manage performers' }, { status: 403 })
+
     const body = await req.json()
     if (!body.name || !String(body.name).trim()) {
       return NextResponse.json({ error: 'Singer name is required' }, { status: 400 })

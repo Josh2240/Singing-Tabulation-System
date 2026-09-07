@@ -33,7 +33,6 @@ export default function App() {
   const [editGenre, setEditGenre] = useState('')
 
   const [selectedSinger, setSelectedSinger] = useState<string | number>('')
-  const [judge, setJudge] = useState('')
   const [score, setScore] = useState('')
   const [criteriaScores, setCriteriaScores] = useState<Record<number, string>>({})
 
@@ -177,13 +176,11 @@ export default function App() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           singerId: Number(selectedSinger),
-          judge,
           score: numericScore,
           criteriaScores: criteriaScoreList
         })
       })
       if (!res.ok) throw new Error('Failed to submit score')
-      setJudge('')
       setScore('')
       setCriteriaScores({})
       await loadScoreboard()
@@ -236,6 +233,8 @@ export default function App() {
   }
 
   const totalCriteriaPercentage = criteria.reduce((sum, c) => sum + Number(c.percentage || 0), 0)
+  const isAdmin = user?.role === 'admin'
+  const isJudge = user?.role === 'judge'
 
   return (
     <div className="tabulation-page">
@@ -271,7 +270,7 @@ export default function App() {
 
       <div className="row g-4">
         <div className="col-lg-5">
-          <section className="card panel-card singers-card mb-4">
+          {isAdmin && <section className="card panel-card singers-card mb-4">
             <div className="panel-heading">
               <div className="panel-heading-copy">
                 <span className="panel-icon panel-icon--violet" aria-hidden="true">
@@ -300,9 +299,9 @@ export default function App() {
                 <i className="bi bi-plus-lg" /> Add performer
               </button>
             </form>
-          </section>
+          </section>}
 
-          {user?.role === 'admin' && (
+          {isAdmin && (
             <section className="card panel-card criteria-card mb-4">
               <div className="panel-heading">
                 <div className="panel-heading-copy">
@@ -401,7 +400,7 @@ export default function App() {
             </section>
           )}
 
-          <section className="card panel-card submit-score-card">
+          {isJudge && <section className="card panel-card submit-score-card">
             <div className="panel-heading">
               <div className="panel-heading-copy">
                 <span className="panel-icon panel-icon--gold" aria-hidden="true">
@@ -409,7 +408,7 @@ export default function App() {
                 </span>
                 <div>
                   <h2 className="panel-title">Submit a score</h2>
-                  <p className="panel-description">Record a judge&apos;s evaluation for the current performer.</p>
+                  <p className="panel-description">Submit your evaluation for the current performer.</p>
                 </div>
               </div>
             </div>
@@ -424,10 +423,6 @@ export default function App() {
                 ))}
               </select>
               <div className="score-input-grid">
-                <div>
-                  <label className="form-label" htmlFor="judge-name">Judge <span>(optional)</span></label>
-                  <input id="judge-name" className="form-control" value={judge} onChange={e => setJudge(e.target.value)} placeholder="Judge name" />
-                </div>
                 <div>
                   <label className="form-label" htmlFor="score-value">Total score</label>
                   <input id="score-value" className="form-control" value={score} onChange={e => setScore(e.target.value)} type="number" step="0.01" min="0" placeholder="0.00" />
@@ -466,7 +461,7 @@ export default function App() {
                 <i className="bi bi-check2-circle" /> Submit score
               </button>
             </form>
-          </section>
+          </section>}
         </div>
 
         <div className="col-lg-7">
@@ -536,12 +531,14 @@ export default function App() {
                                 <div className="singer-name">{s.name}</div>
                                 {s.song && <div className="singer-song"><i className="bi bi-music-note" /> {s.song}{s.genre ? ` · ${s.genre}` : ''}</div>}
                               </div>
-                              <button className="btn btn-sm btn-outline-primary ms-auto" onClick={() => { setEditingSingerId(s.id); setEditName(s.name); setEditSong(s.song || ''); setEditGenre(s.genre || '') }} aria-label="Edit performer">
-                                <i className="bi bi-pencil" />
-                              </button>
-                              <button className="btn btn-sm btn-outline-danger" onClick={() => deleteSinger(s.id)} aria-label="Delete performer">
-                                <i className="bi bi-trash" />
-                              </button>
+                              {isAdmin && <>
+                                <button className="btn btn-sm btn-outline-primary ms-auto" onClick={() => { setEditingSingerId(s.id); setEditName(s.name); setEditSong(s.song || ''); setEditGenre(s.genre || '') }} aria-label="Edit performer">
+                                  <i className="bi bi-pencil" />
+                                </button>
+                                <button className="btn btn-sm btn-outline-danger" onClick={() => deleteSinger(s.id)} aria-label="Delete performer">
+                                  <i className="bi bi-trash" />
+                                </button>
+                              </>}
                             </div>
                           )}
                         </td>
@@ -554,9 +551,9 @@ export default function App() {
                         <td className="text-end">{s.avg.toFixed(2)}</td>
                         <td className="text-end">{s.count}</td>
                         <td>
-                          <button className="btn btn-sm btn-outline-danger" onClick={() => deleteScore(s.id)} aria-label="Delete all scores for this performer">
+                          {isAdmin && <button className="btn btn-sm btn-outline-danger" onClick={() => deleteScore(s.id)} aria-label="Delete all scores for this performer">
                             <i className="bi bi-trash" /> Clear
-                          </button>
+                          </button>}
                         </td>
                       </tr>
                     ))}
@@ -608,9 +605,9 @@ export default function App() {
                           <td className="text-end">{Number(sc.score).toFixed(2)}</td>
                           <td className="text-end">{new Date(sc.createdAt).toLocaleDateString()}</td>
                           <td>
-                            <button className="btn btn-sm btn-outline-danger" onClick={() => deleteScore(sc.id)} aria-label="Delete score">
+                            {isAdmin && <button className="btn btn-sm btn-outline-danger" onClick={() => deleteScore(sc.id)} aria-label="Delete score">
                               <i className="bi bi-trash" />
-                            </button>
+                            </button>}
                           </td>
                         </tr>
                       )
