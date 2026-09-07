@@ -14,7 +14,7 @@
 
 For each score entry:
 
-```
+```scoring
 weightedScoreEntry = Σ (criteriaRawScore / criteriaMaxScore) × criteriaWeight
 ```
 
