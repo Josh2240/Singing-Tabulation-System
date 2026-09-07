@@ -28,3 +28,11 @@ performer; `avg` is `total / numberOfJudges`.
 - Deleting a performer cascades to their scores (FK with `ON DELETE CASCADE`).
 - If the SQLite file is locked, stop the dev server before deleting
   `data.sqlite`.
+
+## Passwords
+
+- For recording passwords
+password
+admin username: admin
+admin password: admin123.
+- Optional for development only.

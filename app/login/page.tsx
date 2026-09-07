@@ -75,11 +75,6 @@ export default function LoginPage() {
             <button className="btn btn-brand w-100 login-btn" type="submit" disabled={loading}>
               {loading ? 'Signing in…' : 'Sign In'}
             </button>
-            <p className="login-hint">
-              Default admin: <strong>admin</strong> / <strong>admin123</strong>
-              <br />
-              (Set <code>ADMIN_USERNAME</code> and <code>ADMIN_PASSWORD</code> in your environment to change this.)
-            </p>
           </form>
         </div>
       </div>
